@@ -8,11 +8,11 @@ export async function addAlcoholLog(formData: FormData) {
   const notes = formData.get('notes') as string
 
   const amount = parseInt(amountStr, 10)
-  if (isNaN(amount)) return { error: 'Invalid amount' }
+  if (isNaN(amount)) return;
 
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
-  if (!userData.user) return { error: 'Unauthorized' }
+  if (!userData.user) return;
 
   const { error } = await supabase.from('alcohol_logs').insert({
     user_id: userData.user.id,
@@ -21,8 +21,7 @@ export async function addAlcoholLog(formData: FormData) {
     notes: notes
   })
 
-  if (error) return { error: error.message }
+  if (error) return;
   
   revalidatePath('/alcohol')
-  return { success: true }
 }
