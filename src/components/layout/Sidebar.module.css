@@ -1,0 +1,47 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  height: 100%;
+}
+.logo {
+  padding: 12px;
+  margin-bottom: 8px;
+}
+.logo h2 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.navItem {
+  padding: 12px;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+  display: inline-block;
+  width: fit-content;
+}
+.navItem:hover {
+  background-color: var(--border-color);
+  text-decoration: none;
+}
+.postButton {
+  margin-top: 16px;
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 9999px;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  width: 90%;
+  transition: background-color 0.2s;
+}
+.postButton:hover {
+  background-color: var(--accent-hover);
+}
