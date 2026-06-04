@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { createPost } from '@/app/actions/posts'
 import { redirect } from 'next/navigation'
+import PostItem from '@/components/ui/PostItem'
 
 export default async function MemosPage() {
   const supabase = await createClient()
@@ -44,21 +45,7 @@ export default async function MemosPage() {
       {/* Timeline Feed */}
       <div>
         {memos?.map((post) => (
-          <article key={post.id} style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '12px' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--bg-secondary)', flexShrink: 0, overflow: 'hidden' }} />
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
-                <span style={{ fontWeight: 'bold' }}>あなた</span>
-                <span style={{ color: 'var(--text-secondary)' }}>
-                  @myself · {new Date(post.created_at).toLocaleDateString()}
-                </span>
-              </div>
-              
-              <p style={{ marginTop: '4px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {post.content}
-              </p>
-            </div>
-          </article>
+          <PostItem key={post.id} post={post} />
         ))}
         {(!memos || memos.length === 0) && (
           <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>

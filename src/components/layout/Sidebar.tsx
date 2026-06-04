@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import styles from './Sidebar.module.css';
+import SearchForm from './SearchForm';
 
 export default function Sidebar() {
   return (
@@ -8,6 +9,9 @@ export default function Sidebar() {
         <Link href="/">
           <h2>ポータル</h2>
         </Link>
+      </div>
+      <div style={{ padding: '0 12px 16px' }}>
+        <SearchForm />
       </div>
       <nav className={styles.nav}>
         <Link href="/" className={styles.navItem}>ホーム</Link>
