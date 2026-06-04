@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { deletePost } from '@/app/actions/posts';
 
 export default function PostItem({ post }: { post: any }) {
   const isBookmark = 'original_url' in post;
@@ -24,13 +25,20 @@ export default function PostItem({ post }: { post: any }) {
         ) : null}
       </div>
       <div style={{ flex: 1, overflow: 'hidden' }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
-          <span style={{ fontWeight: 'bold' }}>
-            {isBookmark ? (post.author_name || 'あなた') : 'あなた'}
-          </span>
-          <span style={{ color: 'var(--text-secondary)' }}>
-            {isBookmark && post.author_handle ? `@${post.author_handle}` : '@myself'} · {new Date(post.created_at).toLocaleDateString()}
-          </span>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+            <span style={{ fontWeight: 'bold' }}>
+              {isBookmark ? (post.author_name || 'あなた') : 'あなた'}
+            </span>
+            <span style={{ color: 'var(--text-secondary)' }}>
+              {isBookmark && post.author_handle ? `@${post.author_handle}` : '@myself'} · {new Date(post.created_at).toLocaleDateString()}
+            </span>
+          </div>
+          <form action={deletePost.bind(null, post.id, isBookmark)}>
+            <button type="submit" style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.8rem', padding: '4px' }}>
+              削除
+            </button>
+          </form>
         </div>
         
         <p style={{ marginTop: '4px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>

@@ -104,3 +104,25 @@ export async function createPost(formData: FormData) {
   revalidatePath('/memos')
 }
 
+export async function deletePost(id: string, isBookmark: boolean) {
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData.user) return;
+
+  const table = isBookmark ? 'bookmarks' : 'memos';
+
+  const { error } = await supabase
+    .from(table)
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userData.user.id);
+
+  if (error) {
+    console.log('Delete error:', error.message);
+  }
+
+  revalidatePath('/')
+  revalidatePath('/bookmarks')
+  revalidatePath('/memos')
+  revalidatePath('/search')
+}
