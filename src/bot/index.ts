@@ -45,6 +45,9 @@ client.once(Events.ClientReady, async (readyClient) => {
     new SlashCommandBuilder()
       .setName('bookmarks')
       .setDescription('最近のブックマークを5件表示します'),
+    new SlashCommandBuilder()
+      .setName('nowplaying')
+      .setDescription('現在再生中の曲を表示します'),
   ].map(command => command.toJSON());
 
   const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
@@ -245,6 +248,96 @@ client.on(Events.InteractionCreate, async interaction => {
     } catch (err: any) {
       console.error('Slash Command Error:', err);
       await interaction.editReply('ブックマークの取得中にエラーが発生しました。');
+    }
+  } else if (interaction.commandName === 'nowplaying') {
+    await interaction.deferReply();
+    try {
+      let isPlaying = false;
+      let title = '';
+      let artist = '';
+      let url = '';
+      let source = '';
+
+      // 1. まずSpotifyが連携されているかチェックし、再生中か確認する
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('spotify_refresh_token')
+        .eq('user_id', appUserId)
+        .single();
+
+      if (settings && settings.spotify_refresh_token) {
+        const clientId = process.env.SPOTIFY_CLIENT_ID;
+        const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+        if (clientId && clientSecret) {
+          const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Authorization': 'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64')
+            },
+            body: new URLSearchParams({
+              grant_type: 'refresh_token',
+              refresh_token: settings.spotify_refresh_token
+            }),
+            cache: 'no-store'
+          });
+
+          const tokenData = await tokenRes.json();
+          if (!tokenData.error) {
+            const playingRes = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+              headers: { 'Authorization': `Bearer ${tokenData.access_token}` },
+              cache: 'no-store'
+            });
+
+            if (playingRes.status === 200) {
+              const playingData = await playingRes.json();
+              if (playingData.item && playingData.is_playing) {
+                isPlaying = true;
+                title = playingData.item.name;
+                artist = playingData.item.artists.map((a: any) => a.name).join(', ');
+                url = playingData.item.external_urls?.spotify || '';
+                source = 'Spotify';
+              }
+            }
+          }
+        }
+      }
+
+      // 2. Spotifyが再生されていない場合はLast.fmをチェックする
+      if (!isPlaying) {
+        const lastfmUser = process.env.LASTFM_USERNAME;
+        const lastfmApiKey = process.env.LASTFM_API_KEY;
+
+        if (lastfmUser && lastfmApiKey) {
+          const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${lastfmUser}&api_key=${lastfmApiKey}&format=json&limit=1`, {
+            cache: 'no-store'
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const tracks = data?.recenttracks?.track;
+            if (tracks && tracks.length > 0) {
+              const currentTrack = tracks[0];
+              if (currentTrack['@attr']?.nowplaying === 'true') {
+                isPlaying = true;
+                title = currentTrack.name;
+                artist = currentTrack.artist?.['#text'] || 'Unknown Artist';
+                url = currentTrack.url || '';
+                source = 'Last.fm (YouTube Music等)';
+              }
+            }
+          }
+        }
+      }
+
+      if (isPlaying) {
+        await interaction.editReply(`🎵 **Now Playing (${source})**\n**${title}** by ${artist}\n${url}`);
+      } else {
+        await interaction.editReply('現在再生中の曲は見つかりませんでした。\n（※Spotifyの情報を取得するにはWebポータルから連携するか、YouTube Music等を取得するためにLast.fmを設定してください）');
+      }
+    } catch (err: any) {
+      console.error('Slash Command Error:', err);
+      await interaction.editReply('再生中の曲の取得中にエラーが発生しました。');
     }
   }
 });
