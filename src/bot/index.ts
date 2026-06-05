@@ -306,8 +306,8 @@ client.on(Events.InteractionCreate, async interaction => {
 
       // 2. Spotifyが再生されていない場合はLast.fmをチェックする
       if (!isPlaying) {
-        const lastfmUser = process.env.LASTFM_USERNAME;
-        const lastfmApiKey = process.env.LASTFM_API_KEY;
+        const lastfmUser = process.env.LASTFM_USERNAME?.replace(/["']/g, '');
+        const lastfmApiKey = process.env.LASTFM_API_KEY?.replace(/["']/g, '');
 
         if (lastfmUser && lastfmApiKey) {
           const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${lastfmUser}&api_key=${lastfmApiKey}&format=json&limit=1`, {

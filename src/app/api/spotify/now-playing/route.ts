@@ -3,8 +3,8 @@ import { createClient } from '@/utils/supabase/server'
 
 // Last.fm API から現在再生中の曲を取得するヘルパー関数
 async function getLastFmNowPlaying() {
-  const lastfmUser = process.env.LASTFM_USERNAME;
-  const lastfmApiKey = process.env.LASTFM_API_KEY;
+  const lastfmUser = process.env.LASTFM_USERNAME?.replace(/["']/g, '');
+  const lastfmApiKey = process.env.LASTFM_API_KEY?.replace(/["']/g, '');
 
   if (!lastfmUser || !lastfmApiKey) {
     return null;
