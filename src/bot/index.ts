@@ -42,6 +42,9 @@ client.once(Events.ClientReady, async (readyClient) => {
     new SlashCommandBuilder()
       .setName('memos')
       .setDescription('最近のメモを5件表示します'),
+    new SlashCommandBuilder()
+      .setName('bookmarks')
+      .setDescription('最近のブックマークを5件表示します'),
   ].map(command => command.toJSON());
 
   const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
@@ -209,6 +212,39 @@ client.on(Events.InteractionCreate, async interaction => {
     } catch (err: any) {
       console.error('Slash Command Error:', err);
       await interaction.editReply('メモの取得中にエラーが発生しました。');
+    }
+  } else if (interaction.commandName === 'bookmarks') {
+    await interaction.deferReply();
+    try {
+      const { data, error } = await supabase
+        .from('bookmarks')
+        .select('*')
+        .eq('user_id', appUserId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        await interaction.editReply('まだブックマークがありません。');
+        return;
+      }
+
+      let replyText = '**最近のブックマーク (最新5件)**\n\n';
+      data.forEach((bm: any) => {
+        const date = new Date(bm.created_at).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+        const title = bm.title || bm.author_name || 'タイトルなし';
+        replyText += `**[${date}] ${title}**\n${bm.original_url}\n---\n`;
+      });
+
+      if (replyText.length > 2000) {
+        replyText = replyText.substring(0, 1995) + '...';
+      }
+
+      await interaction.editReply(replyText);
+    } catch (err: any) {
+      console.error('Slash Command Error:', err);
+      await interaction.editReply('ブックマークの取得中にエラーが発生しました。');
     }
   }
 });
