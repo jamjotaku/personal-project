@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials, Events, TextChannel } from 'discord.js';
+import { Client, GatewayIntentBits, Partials, Events, TextChannel, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import { createClient } from '@supabase/supabase-js';
 import cron from 'node-cron';
 import * as cheerio from 'cheerio';
@@ -35,6 +35,25 @@ client.once(Events.ClientReady, async (readyClient) => {
     console.log(`Bot bound to Supabase user: ${appUserId}`);
   } else {
     console.error('No users found in Supabase Auth. Bot cannot save data.');
+  }
+
+  // スラッシュコマンドの登録
+  const commands = [
+    new SlashCommandBuilder()
+      .setName('memos')
+      .setDescription('最近のメモを5件表示します'),
+  ].map(command => command.toJSON());
+
+  const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
+  try {
+    console.log('Started refreshing application (/) commands.');
+    await rest.put(
+      Routes.applicationCommands(readyClient.user.id),
+      { body: commands },
+    );
+    console.log('Successfully reloaded application (/) commands.');
+  } catch (error) {
+    console.error('Error registering commands:', error);
   }
 
   // リマインダー設定 (毎日22:00に通知)
@@ -147,6 +166,50 @@ client.on(Events.MessageCreate, async (message) => {
   } catch (err: any) {
     console.error('Bot Error:', err.message);
     await message.react('❌');
+  }
+});
+
+client.on(Events.InteractionCreate, async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+  if (!appUserId) {
+    await interaction.reply({ content: 'システムエラー: ユーザー情報が初期化されていません。', ephemeral: true });
+    return;
+  }
+
+  if (interaction.commandName === 'memos') {
+    await interaction.deferReply(); // 少し時間がかかる場合のため
+    try {
+      const { data, error } = await supabase
+        .from('memos')
+        .select('*')
+        .eq('user_id', appUserId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        await interaction.editReply('まだメモがありません。');
+        return;
+      }
+
+      let replyText = '**最近のメモ (最新5件)**\n\n';
+      data.forEach((memo: any) => {
+        // 画像URLが含まれるマークダウン表記などはそのまま表示されます
+        const date = new Date(memo.created_at).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+        replyText += `**[${date}]**\n${memo.content}\n---\n`;
+      });
+
+      // Discordの文字数制限(2000文字)を超えないように切り詰め
+      if (replyText.length > 2000) {
+        replyText = replyText.substring(0, 1995) + '...';
+      }
+
+      await interaction.editReply(replyText);
+    } catch (err: any) {
+      console.error('Slash Command Error:', err);
+      await interaction.editReply('メモの取得中にエラーが発生しました。');
+    }
   }
 });
 
