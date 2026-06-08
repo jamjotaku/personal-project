@@ -62,7 +62,7 @@ client.once(Events.ClientReady, async (readyClient) => {
     console.error('Error registering commands:', error);
   }
 
-  // リマインダー設定 (毎日22:00に通知)
+  // リマインダー設定 (毎日22:00 JSTに通知)
   cron.schedule('0 22 * * *', () => {
     // ボットが参加している最初のテキストチャンネルを探して送信
     const guild = client.guilds.cache.first();
@@ -73,6 +73,8 @@ client.once(Events.ClientReady, async (readyClient) => {
         (channel as TextChannel).send('🌙 夜の22時です！今日のメンタルスコアと飲酒記録は付けましたか？\nWebポータルまたはコマンドから記録しましょう！');
       }
     }
+  }, {
+    timezone: "Asia/Tokyo"
   });
 });
 
