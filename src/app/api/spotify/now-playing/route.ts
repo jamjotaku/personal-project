@@ -71,7 +71,7 @@ export async function GET() {
         },
         body: new URLSearchParams({
           grant_type: 'refresh_token',
-          refresh_token: settings.spotify_refresh_token
+          refresh_token: settings!.spotify_refresh_token
         }),
         cache: 'no-store'
       })
