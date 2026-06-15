@@ -25,10 +25,10 @@ export default function MentalForm({ action }: { action: (formData: FormData) =>
         {[1, 2, 3, 4, 5].map((level) => (
           <SubmitButton key={level} level={level} />
         ))}
+        <div className={styles.statusText}>
+          <StatusMessage />
+        </div>
       </form>
-      <div className={styles.statusText}>
-        <StatusMessage />
-      </div>
     </div>
   )
 }
