@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { addMentalLog } from '@/app/actions/mental'
 import MentalForm from './MentalForm'
 import SpotifyWidget from './SpotifyWidget'
+import DiscordPanel from '../ui/DiscordPanel'
 
 export default async function RightSidebar() {
   const supabase = await createClient()
@@ -19,6 +20,9 @@ export default async function RightSidebar() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      
+      <DiscordPanel />
+
       <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '16px' }}>
         <h3 style={{ marginBottom: '12px', fontSize: '1.1rem', fontWeight: 'bold' }}>今日のメンタル</h3>
         
