@@ -30,7 +30,7 @@ export default async function RightSidebar() {
         <MentalForm action={addMentalLog} />
 
         <div style={{ display: 'flex', gap: '8px', height: '100px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-          {mentalLogs?.reverse().map((log) => (
+          {(mentalLogs || []).reverse().map((log) => (
             <div key={log.id} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', height: '100%' }}>
               <div style={{ width: '100%', background: 'var(--accent-color)', height: `${(log.level / 5) * 100}%`, borderRadius: '4px' }} />
               <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{new Date(log.created_at).getDate()}d</span>
