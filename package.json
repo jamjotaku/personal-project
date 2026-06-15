@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "concurrently \"next start\" \"npm run start:bot\"",
-    "start:bot": "tsx src/bot/index.ts",
+    "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
