@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 type MentalLog = {
@@ -9,6 +10,14 @@ type MentalLog = {
 }
 
 export default function MentalGraph({ logs }: { logs: MentalLog[] }) {
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  if (!isClient) return <div style={{ height: '150px' }}>Loading...</div>
+
   // 古い順にソートしてグラフ用データに成形
   const data = [...logs].reverse().map(log => {
     const d = new Date(log.created_at)
