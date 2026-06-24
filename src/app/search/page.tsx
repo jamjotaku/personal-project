@@ -21,6 +21,7 @@ export default async function SearchPage({
   const { data: bookmarks } = await supabase
     .from('bookmarks')
     .select('*')
+    .eq('user_id', user.id)
     .or(`content.ilike.%${query}%,tags.cs.{${query}}`)
     .order('created_at', { ascending: false })
     .limit(30)
@@ -28,6 +29,7 @@ export default async function SearchPage({
   const { data: memos } = await supabase
     .from('memos')
     .select('*')
+    .eq('user_id', user.id)
     .or(`content.ilike.%${query}%,tags.cs.{${query}}`)
     .order('created_at', { ascending: false })
     .limit(30)

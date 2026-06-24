@@ -17,6 +17,14 @@ export default function PostItem({ post }: { post: any }) {
     });
   };
 
+  const getYouTubeId = (url: string) => {
+    if (!url) return null;
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+    return match ? match[1] : null;
+  };
+
+  const youtubeId = isBookmark ? getYouTubeId(post.original_url) : null;
+
   return (
     <article style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '12px' }}>
       <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--bg-secondary)', flexShrink: 0, overflow: 'hidden' }}>
@@ -45,15 +53,26 @@ export default function PostItem({ post }: { post: any }) {
           {renderContent(post.content)}
         </p>
 
+        {/* YouTube Video Player */}
+        {youtubeId && (
+          <div style={{ marginTop: '12px', borderRadius: '16px', overflow: 'hidden', position: 'relative', paddingTop: '56.25%' }}>
+            <iframe 
+              src={`https://www.youtube.com/embed/${youtubeId}`} 
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+              allowFullScreen 
+            />
+          </div>
+        )}
+
         {/* Twitter OGP (画像のみ) */}
-        {isBookmark && post.image_url && !post.title && (
+        {isBookmark && post.image_url && !post.title && !youtubeId && (
           <div style={{ marginTop: '12px', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
             <img src={post.image_url} alt="Media" style={{ width: '100%', height: 'auto', display: 'block' }} />
           </div>
         )}
 
         {/* General OGP Card */}
-        {isBookmark && post.title && (
+        {isBookmark && post.title && !youtubeId && (
           <a href={post.original_url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div style={{ marginTop: '12px', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column' }}>
               {post.image_url && (

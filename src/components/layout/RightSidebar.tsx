@@ -3,6 +3,7 @@ import { addMentalLog } from '@/app/actions/mental'
 import MentalForm from './MentalForm'
 import SpotifyWidget from './SpotifyWidget'
 import DiscordPanel from '../ui/DiscordPanel'
+import MentalGraph from '../ui/MentalGraph'
 
 export default async function RightSidebar() {
   const supabase = await createClient()
@@ -30,14 +31,8 @@ export default async function RightSidebar() {
         {/* メンタル入力フォーム */}
         <MentalForm action={addMentalLog} />
 
-        <div style={{ display: 'flex', gap: '8px', height: '100px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-          {[...(mentalLogs || [])].reverse().map((log) => (
-            <div key={log.id} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', height: '100%' }}>
-              <div style={{ width: '100%', background: 'var(--accent-color)', height: `${(log.level / 5) * 100}%`, borderRadius: '4px' }} />
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{new Date(log.created_at).getDate()}d</span>
-            </div>
-          ))}
-        </div>
+        {/* メンタルスコアの推移グラフ */}
+        <MentalGraph logs={mentalLogs || []} />
         <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'center' }}>1(不調) 〜 5(絶好調)</p>
       </div>
 
