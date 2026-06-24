@@ -15,12 +15,14 @@ export default async function Home() {
   const { data: bookmarks } = await supabase
     .from('bookmarks')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(20)
 
   const { data: memos } = await supabase
     .from('memos')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(20)
 

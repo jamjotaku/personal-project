@@ -17,34 +17,44 @@ export default function DiscordPanel() {
   const supabase = createClient()
 
   useEffect(() => {
-    // 初回ロード時に最新ステータスを取得
-    const fetchStatus = async () => {
+    let channel: any = null;
+
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const userId = session.user.id
+
+      // 初回ロード時に最新ステータスを取得
       const { data } = await supabase
         .from('discord_status')
         .select('*')
+        .eq('user_id', userId)
         .order('updated_at', { ascending: false })
         .limit(1)
         .single()
       if (data) {
         setStatus(data)
       }
-    }
-    fetchStatus()
 
-    // リアルタイムサブスクリプション
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'discord_status' },
-        (payload) => {
-          setStatus(payload.new as DiscordStatus)
-        }
-      )
-      .subscribe()
+      // リアルタイムサブスクリプション
+      channel = supabase
+        .channel('schema-db-changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'discord_status', filter: `user_id=eq.${userId}` },
+          (payload) => {
+            setStatus(payload.new as DiscordStatus)
+          }
+        )
+        .subscribe()
+    }
+    
+    init()
 
     return () => {
-      supabase.removeChannel(channel)
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
     }
   }, [supabase])
 
