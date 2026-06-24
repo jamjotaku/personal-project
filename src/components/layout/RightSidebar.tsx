@@ -3,7 +3,9 @@ import { addMentalLog } from '@/app/actions/mental'
 import MentalForm from './MentalForm'
 import SpotifyWidget from './SpotifyWidget'
 import DiscordPanel from '../ui/DiscordPanel'
-import MentalGraph from '../ui/MentalGraph'
+import dynamic from 'next/dynamic'
+
+const MentalGraph = dynamic(() => import('../ui/MentalGraph'), { ssr: false })
 
 export default async function RightSidebar() {
   const supabase = await createClient()
