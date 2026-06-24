@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 type MentalLog = {
   id: number
@@ -10,6 +9,16 @@ type MentalLog = {
 }
 
 export default function MentalGraph({ logs }: { logs: MentalLog[] }) {
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  if (!isClient) {
+    return <div style={{ height: '100px', marginTop: '16px' }}>Loading...</div>
+  }
+
   if (!logs || logs.length === 0) {
     return <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '16px' }}>まだ記録がありません</div>
   }
