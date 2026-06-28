@@ -1,22 +1,50 @@
+import { cookies } from 'next/headers'
 import DiscordPanel from '../ui/DiscordPanel'
 import MentalWidget from '../widgets/MentalWidget'
 import MusicWidget from '../widgets/MusicWidget'
+import ClockWidget from '../widgets/ClockWidget'
+import WeatherWidget from '../widgets/WeatherWidget'
+import CountdownWidget from '../widgets/CountdownWidget'
+import StickyNoteWidget from '../widgets/StickyNoteWidget'
+import ImageWidget from '../widgets/ImageWidget'
+
+const widgetRegistry: Record<string, React.ReactNode> = {
+  discord: <DiscordPanel />,
+  mental: <MentalWidget />,
+  music: <MusicWidget />,
+  clock: <ClockWidget />,
+  weather: <WeatherWidget />,
+  countdown: <CountdownWidget />,
+  stickynote: <StickyNoteWidget />,
+  image: <ImageWidget />,
+}
+
+const defaultWidgets = ['clock', 'weather', 'countdown', 'stickynote', 'image', 'mental', 'music', 'discord']
 
 export default async function RightSidebar() {
-  // 将来的にはここをユーザーのDB設定から取得するように拡張可能
-  const activeWidgets = [
-    { id: 'discord', component: <DiscordPanel /> },
-    { id: 'mental', component: <MentalWidget /> },
-    { id: 'music', component: <MusicWidget /> },
-  ]
+  const cookieStore = await cookies()
+  const saved = cookieStore.get('active_widgets')?.value
+  
+  let activeWidgetIds = defaultWidgets
+  if (saved) {
+    try {
+      activeWidgetIds = JSON.parse(saved)
+    } catch {
+      // parse error
+    }
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      {activeWidgets.map((widget) => (
-        <div key={widget.id}>
-          {widget.component}
-        </div>
-      ))}
+      {activeWidgetIds.map((id) => {
+        const component = widgetRegistry[id]
+        if (!component) return null
+        return (
+          <div key={id}>
+            {component}
+          </div>
+        )
+      })}
     </div>
   );
 }

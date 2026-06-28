@@ -7,6 +7,7 @@ export default function BottomNav() {
       <Link href="/bookmarks">BM</Link>
       <Link href="/alcohol">飲酒</Link>
       <Link href="/memos">メモ</Link>
+      <Link href="/settings">設定</Link>
     </nav>
   );
 }

@@ -17,6 +17,7 @@ export default function Sidebar() {
         <Link href="/" className={styles.navItem}>ホーム</Link>
         <Link href="/bookmarks" className={styles.navItem}>ブックマーク</Link>
         <Link href="/memos" className={styles.navItem}>壁打ちメモ</Link>
+        <Link href="/settings" className={styles.navItem}>設定</Link>
       </nav>
       <button className={styles.postButton}>投稿する</button>
     </div>
