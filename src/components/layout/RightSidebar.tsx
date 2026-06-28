@@ -1,45 +1,22 @@
-import { createClient } from '@/utils/supabase/server'
-import { addMentalLog } from '@/app/actions/mental'
-import MentalForm from './MentalForm'
-import SpotifyWidget from './SpotifyWidget'
 import DiscordPanel from '../ui/DiscordPanel'
-import MentalGraph from '../ui/MentalGraph'
+import MentalWidget from '../widgets/MentalWidget'
+import MusicWidget from '../widgets/MusicWidget'
 
 export default async function RightSidebar() {
-  const supabase = await createClient()
-  
-  // ユーザーがログインしているか確認
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  // 過去のメンタル記録を取得
-  const { data: mentalLogs } = await supabase
-    .from('mental_logs')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(7)
+  // 将来的にはここをユーザーのDB設定から取得するように拡張可能
+  const activeWidgets = [
+    { id: 'discord', component: <DiscordPanel /> },
+    { id: 'mental', component: <MentalWidget /> },
+    { id: 'music', component: <MusicWidget /> },
+  ]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      
-      <DiscordPanel />
-
-      <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '16px' }}>
-        <h3 style={{ marginBottom: '12px', fontSize: '1.1rem', fontWeight: 'bold' }}>今日のメンタル</h3>
-        
-        {/* メンタル入力フォーム */}
-        <MentalForm action={addMentalLog} />
-
-        {/* メンタルスコアの推移グラフ */}
-        <MentalGraph logs={mentalLogs || []} />
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'center' }}>1(不調) 〜 5(絶好調)</p>
-      </div>
-
-      <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '16px' }}>
-        <h3 style={{ marginBottom: '12px', fontSize: '1.1rem', fontWeight: 'bold' }}>再生中の音楽</h3>
-        <SpotifyWidget />
-      </div>
+      {activeWidgets.map((widget) => (
+        <div key={widget.id}>
+          {widget.component}
+        </div>
+      ))}
     </div>
   );
 }
